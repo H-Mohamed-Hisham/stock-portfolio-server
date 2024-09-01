@@ -1,0 +1,27 @@
+AUTH ::
+
+{
+  "email": "hmhwebdev@gmail.com",
+  "password": "Hifaaz@17112023"
+}
+
+{
+  "email": "test_user@mail.com",
+  "password": "TestUser@9876"
+}
+
+TRANSACTION CREATE :: 
+
+{
+  "date": "2024-08-23T08:57:31.772Z",
+  "asset_id": "1cef4694-0917-490e-b889-7234a8ddb18a",
+  "transaction_type": "buy",
+  "quantity": 1,
+  "price": 10.33,
+  "tax": 5.20,
+}
+
+
+TEMP TOKEN :
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOWZlNTBjODgtZThjOS00NGI3LWE1ZGUtYjU2MjFlY2ZjNzc1IiwiaWF0IjoxNzI1MDE4NjU1LCJleHAiOjE3MjUxOTE0NTV9.PrcuANZ7ZkX3DnDdIxvD6nu4X50cpE2_WjBuDKn6F_8

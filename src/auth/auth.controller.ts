@@ -11,9 +11,9 @@ import { LoginDto } from './dto/login.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
+  @Post('sign-in')
   @ApiOkResponse({ type: AuthEntity })
-  login(@Body() { email, password }: LoginDto) {
-    return this.authService.login(email, password);
+  SignIn(@Body() { email, password }: LoginDto) {
+    return this.authService.signIn(email, password);
   }
 }

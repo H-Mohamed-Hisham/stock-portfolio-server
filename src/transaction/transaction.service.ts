@@ -8,10 +8,7 @@ import { PrismaService } from '@app/prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { ListTransactionDto } from './dto/list-transaction.dto';
-import {
-  AssetProfitLossDto,
-  OverallProfitLossDto,
-} from './dto/profit-loss.dto';
+import { AssetStatDto, OverallStatDto } from './dto/stat.dto';
 
 // Auth
 import { AuthUserEntity } from '@app/auth/entities/auth.entity';
@@ -109,13 +106,13 @@ export class TransactionService {
     });
   }
 
-  // * ASSET PROFIT/LOSS
-  async findAssetProfitLoss(
+  // * ASSET STAT
+  async findAssetStat(
     loggedInUser: AuthUserEntity,
-    assetProfitLossDto: AssetProfitLossDto,
+    assetStatDto: AssetStatDto,
   ) {
     const logged_in_user = loggedInUser;
-    const { asset_id } = assetProfitLossDto;
+    const { asset_id } = assetStatDto;
 
     const asset_detail = await this.prisma.asset.findUnique({
       where: {
@@ -187,14 +184,14 @@ export class TransactionService {
     return result;
   }
 
-  // * OVERALL PROFIT/LOSS
-  async findOverallProfitLoss(
+  // * OVERALL STAT
+  async findOverallStat(
     loggedInUser: AuthUserEntity,
-    overallProfitLossDto: OverallProfitLossDto,
+    overallStatDto: OverallStatDto,
   ) {
     const logged_in_user = loggedInUser;
 
-    const { asset_type } = overallProfitLossDto;
+    const { asset_type } = overallStatDto;
 
     const buy_transaction = await this.prisma.transaction.aggregate({
       _sum: {
@@ -241,6 +238,8 @@ export class TransactionService {
           : 'no profit no loss';
 
     const result = {
+      name: asset_type === 'stock' ? 'Stock' : 'Index',
+      symbol: asset_type === 'stock' ? 'STOCK' : 'INDEX',
       invested: Number(invested),
       returns: Number(returns),
       quantity_bought,

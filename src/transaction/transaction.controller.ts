@@ -26,14 +26,8 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionEntity } from './entities/transaction.entity';
 import { ListTransactionDto } from './dto/list-transaction.dto';
-import {
-  AssetProfitLossDto,
-  OverallProfitLossDto,
-} from './dto/profit-loss.dto';
-import {
-  AssetProfitLossEntity,
-  OverallProfitLossEntity,
-} from './entities/profit-loss.entity';
+import { AssetStatDto, OverallStatDto } from './dto/stat.dto';
+import { StatEntity } from './entities/stat.entity';
 
 // Auth
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -83,50 +77,47 @@ export class TransactionController {
     );
   }
 
-  // * FIND ASSET PROFIT/LOSS
-  @Post('asset-profit-loss')
+  // * FIND ASSET STAT
+  @Post('asset-stat')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: AssetProfitLossEntity })
-  async findAssetProfitLoss(
+  @ApiOkResponse({ type: StatEntity })
+  async findAssetStat(
     @LoggedInUser() loggedInUser: AuthUserEntity,
-    @Body() assetProfitLossDto: AssetProfitLossDto,
+    @Body() assetStatDto: AssetStatDto,
   ) {
-    const { asset_id } = assetProfitLossDto;
+    const { asset_id } = assetStatDto;
     const asset = await this.assetService.findOne(asset_id);
     if (!asset) {
       throw new NotFoundException(`Asset with ${asset_id} does not exist.`);
     }
-    const profit_loss = new AssetProfitLossEntity(
-      await this.transactionService.findAssetProfitLoss(
-        loggedInUser,
-        assetProfitLossDto,
-      ),
+    const profit_loss = new StatEntity(
+      await this.transactionService.findAssetStat(loggedInUser, assetStatDto),
     );
 
     return profit_loss;
   }
 
   // * FIND OVERALL PROFIT/LOSS
-  @Post('overall-profit-loss')
+  @Post('overall-stat')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: OverallProfitLossEntity })
-  async findOverallProfitLoss(
+  @ApiOkResponse({ type: StatEntity })
+  async findOverallStat(
     @LoggedInUser() loggedInUser: AuthUserEntity,
-    @Body() overallProfitLossDto: OverallProfitLossDto,
+    @Body() overallStatDto: OverallStatDto,
   ) {
-    const { asset_type } = overallProfitLossDto;
+    const { asset_type } = overallStatDto;
     const is_asset_type = ['stock', 'index'].includes(asset_type);
     if (!is_asset_type) {
       throw new NotFoundException(
         `Asset type with ${asset_type} does not exist.`,
       );
     }
-    const profit_loss = new OverallProfitLossEntity(
-      await this.transactionService.findOverallProfitLoss(
+    const profit_loss = new StatEntity(
+      await this.transactionService.findOverallStat(
         loggedInUser,
-        overallProfitLossDto,
+        overallStatDto,
       ),
     );
     return profit_loss;

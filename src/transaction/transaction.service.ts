@@ -13,8 +13,8 @@ import {
   OverallProfitLossDto,
 } from './dto/profit-loss.dto';
 
-// User
-import { UserStorage } from '@app/user/user.storage';
+// Auth
+import { AuthUserEntity } from '@app/auth/entities/auth.entity';
 
 // Utils
 import { calculateTotal } from '@app/utils/calculation';
@@ -24,8 +24,11 @@ export class TransactionService {
   constructor(private prisma: PrismaService) {}
 
   // * CREATE
-  async createTransaction(createTransactionDto: CreateTransactionDto) {
-    const logged_in_user = UserStorage.get();
+  async createTransaction(
+    loggedInUser: AuthUserEntity,
+    createTransactionDto: CreateTransactionDto,
+  ) {
+    const logged_in_user = loggedInUser;
     const { transaction_type, quantity, price, tax } = createTransactionDto;
 
     const total = calculateTotal({
@@ -49,8 +52,11 @@ export class TransactionService {
   }
 
   // * LIST
-  async findAllTransaction(listTransactionDto: ListTransactionDto) {
-    const logged_in_user = UserStorage.get();
+  async findAllTransaction(
+    loggedInUser: AuthUserEntity,
+    listTransactionDto: ListTransactionDto,
+  ) {
+    const logged_in_user = loggedInUser;
     const { transaction_type } = listTransactionDto;
 
     return await this.prisma.transaction.findMany({
@@ -64,16 +70,16 @@ export class TransactionService {
   }
 
   // * FIND BY TRANSACTION ID
-  findByTransactionID(id: string) {
-    const logged_in_user = UserStorage.get();
+  findByTransactionID(loggedInUser: AuthUserEntity, id: string) {
+    const logged_in_user = loggedInUser;
     return this.prisma.transaction.findUnique({
       where: { id, user_id: logged_in_user.id },
     });
   }
 
   // * FIND BY ASSET ID
-  findAllByAssetID(id: string) {
-    const logged_in_user = UserStorage.get();
+  findAllByAssetID(loggedInUser: AuthUserEntity, id: string) {
+    const logged_in_user = loggedInUser;
     return this.prisma.transaction.findMany({
       where: {
         asset_id: id,
@@ -83,8 +89,12 @@ export class TransactionService {
   }
 
   // * UPDATE BY ID
-  updateTransaction(id: string, updateTransactionDto: UpdateTransactionDto) {
-    const logged_in_user = UserStorage.get();
+  updateTransaction(
+    loggedInUser: AuthUserEntity,
+    id: string,
+    updateTransactionDto: UpdateTransactionDto,
+  ) {
+    const logged_in_user = loggedInUser;
     return this.prisma.transaction.update({
       where: { id, user_id: logged_in_user.id },
       data: updateTransactionDto,
@@ -92,16 +102,19 @@ export class TransactionService {
   }
 
   // * DELETE
-  removeTransaction(id: string) {
-    const logged_in_user = UserStorage.get();
+  removeTransaction(loggedInUser: AuthUserEntity, id: string) {
+    const logged_in_user = loggedInUser;
     return this.prisma.transaction.delete({
       where: { id, user_id: logged_in_user.id },
     });
   }
 
   // * ASSET PROFIT/LOSS
-  async findAssetProfitLoss(assetProfitLossDto: AssetProfitLossDto) {
-    const logged_in_user = UserStorage.get();
+  async findAssetProfitLoss(
+    loggedInUser: AuthUserEntity,
+    assetProfitLossDto: AssetProfitLossDto,
+  ) {
+    const logged_in_user = loggedInUser;
     const { asset_id } = assetProfitLossDto;
 
     const asset_detail = await this.prisma.asset.findUnique({
@@ -175,8 +188,12 @@ export class TransactionService {
   }
 
   // * OVERALL PROFIT/LOSS
-  async findOverallProfitLoss(overallProfitLossDto: OverallProfitLossDto) {
-    const logged_in_user = UserStorage.get();
+  async findOverallProfitLoss(
+    loggedInUser: AuthUserEntity,
+    overallProfitLossDto: OverallProfitLossDto,
+  ) {
+    const logged_in_user = loggedInUser;
+
     const { asset_type } = overallProfitLossDto;
 
     const buy_transaction = await this.prisma.transaction.aggregate({

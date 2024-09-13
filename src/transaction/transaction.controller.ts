@@ -37,6 +37,8 @@ import {
 
 // Auth
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { LoggedInUser } from 'src/auth/auth.decorator';
+import { AuthUserEntity } from 'src/auth/entities/auth.entity';
 
 @Controller('transaction')
 @ApiTags('transaction')
@@ -51,9 +53,15 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: TransactionEntity })
-  async createTransaction(@Body() createTransactionDto: CreateTransactionDto) {
+  async createTransaction(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
+    @Body() createTransactionDto: CreateTransactionDto,
+  ) {
     return new TransactionEntity(
-      await this.transactionService.createTransaction(createTransactionDto),
+      await this.transactionService.createTransaction(
+        loggedInUser,
+        createTransactionDto,
+      ),
     );
   }
 
@@ -62,9 +70,14 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: TransactionEntity })
-  async findAllTransaction(@Body() listTransactionDto: ListTransactionDto) {
-    const transactions =
-      await this.transactionService.findAllTransaction(listTransactionDto);
+  async findAllTransaction(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
+    @Body() listTransactionDto: ListTransactionDto,
+  ) {
+    const transactions = await this.transactionService.findAllTransaction(
+      loggedInUser,
+      listTransactionDto,
+    );
     return transactions.map(
       (transaction) => new TransactionEntity(transaction),
     );
@@ -75,14 +88,20 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: AssetProfitLossEntity })
-  async findAssetProfitLoss(@Body() assetProfitLossDto: AssetProfitLossDto) {
+  async findAssetProfitLoss(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
+    @Body() assetProfitLossDto: AssetProfitLossDto,
+  ) {
     const { asset_id } = assetProfitLossDto;
     const asset = await this.assetService.findOne(asset_id);
     if (!asset) {
       throw new NotFoundException(`Asset with ${asset_id} does not exist.`);
     }
     const profit_loss = new AssetProfitLossEntity(
-      await this.transactionService.findAssetProfitLoss(assetProfitLossDto),
+      await this.transactionService.findAssetProfitLoss(
+        loggedInUser,
+        assetProfitLossDto,
+      ),
     );
 
     return profit_loss;
@@ -94,6 +113,7 @@ export class TransactionController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: OverallProfitLossEntity })
   async findOverallProfitLoss(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
     @Body() overallProfitLossDto: OverallProfitLossDto,
   ) {
     const { asset_type } = overallProfitLossDto;
@@ -104,7 +124,10 @@ export class TransactionController {
       );
     }
     const profit_loss = new OverallProfitLossEntity(
-      await this.transactionService.findOverallProfitLoss(overallProfitLossDto),
+      await this.transactionService.findOverallProfitLoss(
+        loggedInUser,
+        overallProfitLossDto,
+      ),
     );
     return profit_loss;
   }
@@ -114,9 +137,12 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: TransactionEntity })
-  async findByTransactionID(@Param('id') id: string) {
+  async findByTransactionID(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
+    @Param('id') id: string,
+  ) {
     const transaction = new TransactionEntity(
-      await this.transactionService.findByTransactionID(id),
+      await this.transactionService.findByTransactionID(loggedInUser, id),
     );
     if (!transaction) {
       throw new NotFoundException(`Transaction with ${id} does not exist.`);
@@ -129,12 +155,18 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: TransactionEntity })
-  async findAllByAssetID(@Param('id') id: string) {
+  async findAllByAssetID(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
+    @Param('id') id: string,
+  ) {
     const asset = await this.assetService.findOne(id);
     if (!asset) {
       throw new NotFoundException(`Asset with ${id} does not exist.`);
     }
-    const transactions = await this.transactionService.findAllByAssetID(id);
+    const transactions = await this.transactionService.findAllByAssetID(
+      loggedInUser,
+      id,
+    );
     return transactions.map(
       (transaction) => new TransactionEntity(transaction),
     );
@@ -146,15 +178,23 @@ export class TransactionController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: TransactionEntity })
   async updateTransaction(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
     @Param('id') id: string,
     @Body() updateTransactionDto: UpdateTransactionDto,
   ) {
-    const transaction = this.transactionService.findByTransactionID(id);
+    const transaction = this.transactionService.findByTransactionID(
+      loggedInUser,
+      id,
+    );
     if (!transaction) {
       throw new NotFoundException(`Transaction with ${id} does not exist.`);
     }
     return new TransactionEntity(
-      await this.transactionService.updateTransaction(id, updateTransactionDto),
+      await this.transactionService.updateTransaction(
+        loggedInUser,
+        id,
+        updateTransactionDto,
+      ),
     );
   }
 
@@ -163,13 +203,19 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: TransactionEntity })
-  async removeTransaction(@Param('id') id: string) {
-    const transaction = this.transactionService.findByTransactionID(id);
+  async removeTransaction(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
+    @Param('id') id: string,
+  ) {
+    const transaction = this.transactionService.findByTransactionID(
+      loggedInUser,
+      id,
+    );
     if (!transaction) {
       throw new NotFoundException(`Transaction with ${id} does not exist.`);
     }
     return new TransactionEntity(
-      await this.transactionService.removeTransaction(id),
+      await this.transactionService.removeTransaction(loggedInUser, id),
     );
   }
 }

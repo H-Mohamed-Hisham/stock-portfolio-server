@@ -7,7 +7,9 @@ import { PrismaService } from '@app/prisma/prisma.service';
 // User
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserStorage } from './user.storage';
+
+// Auth
+import { AuthUserEntity } from '@app/auth/entities/auth.entity';
 
 // Constants
 export const roundsOfHashing = 7;
@@ -49,8 +51,8 @@ export class UserService {
   }
 
   // * PROFILE
-  async profile() {
-    const logged_in_user = UserStorage.get();
+  async profile(loggedInUser: AuthUserEntity) {
+    const logged_in_user = loggedInUser;
     return this.prisma.user.findUnique({
       where: { id: logged_in_user.id },
       select: {
@@ -63,8 +65,8 @@ export class UserService {
   }
 
   // * UPDATE
-  async update(updateUserDto: UpdateUserDto) {
-    const logged_in_user = UserStorage.get();
+  async update(loggedInUser: AuthUserEntity, updateUserDto: UpdateUserDto) {
+    const logged_in_user = loggedInUser;
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(
         updateUserDto.password,
@@ -89,9 +91,10 @@ export class UserService {
   // }
 
   // * REMOVE
-  // remove(id: string) {
-  //   return this.prisma.user.delete({
-  //     where: { id },
-  //   });
-  // }
+  remove(loggedInUser: AuthUserEntity) {
+    const logged_in_user = loggedInUser;
+    return this.prisma.user.delete({
+      where: { id: logged_in_user.id },
+    });
+  }
 }

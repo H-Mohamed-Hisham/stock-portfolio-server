@@ -5,9 +5,9 @@ import {
   Body,
   Patch,
   UseGuards,
+  Delete,
   // Req,
   // Param,
-  // Delete,
   // Request,
 } from '@nestjs/common';
 import {
@@ -16,7 +16,6 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-// import { Request } from 'express';
 
 // User
 import { UserService } from './user.service';
@@ -26,6 +25,8 @@ import { UserEntity } from './entities/user.entity';
 
 // Auth
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { LoggedInUser } from 'src/auth/auth.decorator';
+import { AuthUserEntity } from '@app/auth/entities/auth.entity';
 
 @Controller('user')
 @ApiTags('user')
@@ -63,8 +64,8 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
-  async findProfile() {
-    return new UserEntity(await this.userService.profile());
+  async findProfile(@LoggedInUser() loggedInUser: AuthUserEntity) {
+    return new UserEntity(await this.userService.profile(loggedInUser));
   }
 
   // * UPDATE
@@ -72,8 +73,13 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: UserEntity })
-  async update(@Body() updateUserDto: UpdateUserDto) {
-    return new UserEntity(await this.userService.update(updateUserDto));
+  async update(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return new UserEntity(
+      await this.userService.update(loggedInUser, updateUserDto),
+    );
   }
 
   // * UPDATE BY ID
@@ -86,11 +92,11 @@ export class UserController {
   // }
 
   // * DELETE
-  // @Delete(':id')
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
-  // @ApiOkResponse({ type: UserEntity })
-  // async remove(@Param('id') id: string) {
-  //   return new UserEntity(await this.userService.remove(id));
-  // }
+  @Delete('/remove')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: UserEntity })
+  async remove(@LoggedInUser() loggedInUser: AuthUserEntity) {
+    return new UserEntity(await this.userService.remove(loggedInUser));
+  }
 }

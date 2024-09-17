@@ -3,6 +3,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Decimal } from '@prisma/client/runtime/library';
 import { Transform } from 'class-transformer';
 
+// Asset
+import { AssetEntity } from 'src/asset/entities/asset.entity';
+
 export class TransactionEntity implements Transaction {
   constructor({ ...data }: Partial<TransactionEntity>) {
     Object.assign(this, data);
@@ -25,6 +28,9 @@ export class TransactionEntity implements Transaction {
 
   @ApiProperty()
   quantity: number;
+
+  @ApiProperty()
+  asset: AssetEntity;
 
   @ApiProperty()
   @Transform(({ value }: { value: Decimal }) =>

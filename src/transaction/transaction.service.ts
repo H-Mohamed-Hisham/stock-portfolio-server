@@ -63,6 +63,25 @@ export class TransactionService {
           transaction_type: transaction_type,
         }),
       },
+      select: {
+        id: true,
+        user_id: true,
+        date: true,
+        asset_id: true,
+        transaction_type: true,
+        quantity: true,
+        price: true,
+        tax: true,
+        total: true,
+        asset: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+            type: true,
+          },
+        },
+      },
     });
   }
 
@@ -71,6 +90,25 @@ export class TransactionService {
     const logged_in_user = loggedInUser;
     return this.prisma.transaction.findUnique({
       where: { id, user_id: logged_in_user.id },
+      select: {
+        id: true,
+        user_id: true,
+        date: true,
+        asset_id: true,
+        transaction_type: true,
+        quantity: true,
+        price: true,
+        tax: true,
+        total: true,
+        asset: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+            type: true,
+          },
+        },
+      },
     });
   }
 
@@ -81,6 +119,25 @@ export class TransactionService {
       where: {
         asset_id: id,
         user_id: logged_in_user.id,
+      },
+      select: {
+        id: true,
+        user_id: true,
+        date: true,
+        asset_id: true,
+        transaction_type: true,
+        quantity: true,
+        price: true,
+        tax: true,
+        total: true,
+        asset: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+            type: true,
+          },
+        },
       },
     });
   }

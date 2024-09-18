@@ -29,7 +29,7 @@ export class TransactionEntity implements Transaction {
   @ApiProperty()
   quantity: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: AssetEntity })
   asset: AssetEntity;
 
   @ApiProperty()

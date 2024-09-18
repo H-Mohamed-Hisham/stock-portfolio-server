@@ -7,7 +7,10 @@ import { PrismaService } from '@app/prisma/prisma.service';
 // Transaction
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { ListTransactionDto } from './dto/list-transaction.dto';
+import {
+  TransactionListDto,
+  AssetTransactionListDto,
+} from './dto/transaction.dto';
 import { AssetStatDto, OverallStatDto } from './dto/stat.dto';
 
 // Auth
@@ -51,10 +54,10 @@ export class TransactionService {
   // * LIST
   async findAllTransaction(
     loggedInUser: AuthUserEntity,
-    listTransactionDto: ListTransactionDto,
+    transactionListDto: TransactionListDto,
   ) {
     const logged_in_user = loggedInUser;
-    const { transaction_type } = listTransactionDto;
+    const { transaction_type } = transactionListDto;
 
     return await this.prisma.transaction.findMany({
       where: {
@@ -113,11 +116,15 @@ export class TransactionService {
   }
 
   // * FIND BY ASSET ID
-  findAllByAssetID(loggedInUser: AuthUserEntity, id: string) {
+  findAllByAssetID(
+    loggedInUser: AuthUserEntity,
+    assetTransactionListDto: AssetTransactionListDto,
+  ) {
+    const { asset_id } = assetTransactionListDto;
     const logged_in_user = loggedInUser;
     return this.prisma.transaction.findMany({
       where: {
-        asset_id: id,
+        asset_id: asset_id,
         user_id: logged_in_user.id,
       },
       select: {

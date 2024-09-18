@@ -25,7 +25,10 @@ import { TransactionService } from './transaction.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionEntity } from './entities/transaction.entity';
-import { ListTransactionDto } from './dto/list-transaction.dto';
+import {
+  TransactionListDto,
+  AssetTransactionListDto,
+} from './dto/transaction.dto';
 import { AssetStatDto, OverallStatDto } from './dto/stat.dto';
 import { StatEntity } from './entities/stat.entity';
 
@@ -66,11 +69,11 @@ export class TransactionController {
   @ApiCreatedResponse({ type: TransactionEntity })
   async findAllTransaction(
     @LoggedInUser() loggedInUser: AuthUserEntity,
-    @Body() listTransactionDto: ListTransactionDto,
+    @Body() transactionListDto: TransactionListDto,
   ) {
     const transactions = await this.transactionService.findAllTransaction(
       loggedInUser,
-      listTransactionDto,
+      transactionListDto,
     );
     return transactions.map(
       (transaction) => new TransactionEntity(transaction),
@@ -142,21 +145,22 @@ export class TransactionController {
   }
 
   // * FIND ALL BY ASSET ID
-  @Get('asset/:id')
+  @Post('asset')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: TransactionEntity })
   async findAllByAssetID(
     @LoggedInUser() loggedInUser: AuthUserEntity,
-    @Param('id') id: string,
+    @Body() assetTransactionListDto: AssetTransactionListDto,
   ) {
-    const asset = await this.assetService.findOne(id);
+    const { asset_id } = assetTransactionListDto;
+    const asset = await this.assetService.findOne(asset_id);
     if (!asset) {
-      throw new NotFoundException(`Asset with ${id} does not exist.`);
+      throw new NotFoundException(`Asset with ${asset_id} does not exist.`);
     }
     const transactions = await this.transactionService.findAllByAssetID(
       loggedInUser,
-      id,
+      assetTransactionListDto,
     );
     return transactions.map(
       (transaction) => new TransactionEntity(transaction),

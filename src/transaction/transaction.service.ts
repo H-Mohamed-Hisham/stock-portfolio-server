@@ -12,6 +12,7 @@ import {
   AssetTransactionListDto,
 } from './dto/transaction.dto';
 import { AssetStatDto, OverallStatDto } from './dto/stat.dto';
+import { RemoveTransactionDto } from './dto/remove-transaction.dto';
 
 // Auth
 import { AuthUserEntity } from '@app/auth/entities/auth.entity';
@@ -156,17 +157,50 @@ export class TransactionService {
     updateTransactionDto: UpdateTransactionDto,
   ) {
     const logged_in_user = loggedInUser;
-    return this.prisma.transaction.update({
-      where: { id, user_id: logged_in_user.id },
-      data: updateTransactionDto,
+    const { transaction_type, quantity, price, tax } = updateTransactionDto;
+
+    const total = calculateTotal({
+      transaction_type: transaction_type,
+      quantity: quantity,
+      price: price,
+      tax: tax,
     });
+
+    const transaction = this.prisma.transaction.update({
+      where: { id, user_id: logged_in_user.id },
+      data: {
+        user_id: logged_in_user.id,
+        price: new Prisma.Decimal(price),
+        tax: new Prisma.Decimal(tax),
+        total: new Prisma.Decimal(total),
+        ...updateTransactionDto,
+      },
+    });
+
+    return transaction;
   }
 
-  // * DELETE
-  removeTransaction(loggedInUser: AuthUserEntity, id: string) {
+  // * REMOVE BY TRANSACTION ID
+  removeTransactionByID(loggedInUser: AuthUserEntity, id: string) {
     const logged_in_user = loggedInUser;
     return this.prisma.transaction.delete({
       where: { id, user_id: logged_in_user.id },
+    });
+  }
+
+  // * REMOVE TRANSACTIONS
+  removeTransactions(
+    loggedInUser: AuthUserEntity,
+    removeTransactionDto: RemoveTransactionDto,
+  ) {
+    const logged_in_user = loggedInUser;
+    return this.prisma.transaction.deleteMany({
+      where: {
+        user_id: logged_in_user.id,
+        id: {
+          in: removeTransactionDto.transaction_id,
+        },
+      },
     });
   }
 
@@ -222,16 +256,20 @@ export class TransactionService {
     const quantity_holding = quantity_bought - quantity_sold;
 
     const profit_loss_amount =
-      returns > invested
-        ? Number(returns) - Number(invested)
-        : Number(invested) - Number(returns);
+      quantity_sold === 0
+        ? 0
+        : returns > invested
+          ? Number(returns) - Number(invested)
+          : Number(invested) - Number(returns);
 
     const profit_loss_status =
-      Number(invested) < Number(returns)
-        ? 'profit'
-        : Number(invested) > Number(returns)
-          ? 'loss'
-          : 'no profit no loss';
+      quantity_sold === 0
+        ? 'no profit no loss'
+        : Number(invested) < Number(returns)
+          ? 'profit'
+          : Number(invested) > Number(returns)
+            ? 'loss'
+            : 'no profit no loss';
 
     const result = {
       name,

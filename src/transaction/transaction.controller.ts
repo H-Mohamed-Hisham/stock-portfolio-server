@@ -30,6 +30,7 @@ import {
   AssetTransactionListDto,
 } from './dto/transaction.dto';
 import { AssetStatDto, OverallStatDto } from './dto/stat.dto';
+import { RemoveTransactionDto } from 'src/transaction/dto/remove-transaction.dto';
 import { StatEntity } from './entities/stat.entity';
 
 // Auth
@@ -198,7 +199,7 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: TransactionEntity })
-  async removeTransaction(
+  async removeTransactionByID(
     @LoggedInUser() loggedInUser: AuthUserEntity,
     @Param('id') id: string,
   ) {
@@ -210,7 +211,21 @@ export class TransactionController {
       throw new NotFoundException(`Transaction with ${id} does not exist.`);
     }
     return new TransactionEntity(
-      await this.transactionService.removeTransaction(loggedInUser, id),
+      await this.transactionService.removeTransactionByID(loggedInUser, id),
+    );
+  }
+
+  @Post('remove')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: TransactionEntity })
+  async removeTransactions(
+    @LoggedInUser() loggedInUser: AuthUserEntity,
+    @Body() removeTransactionDto: RemoveTransactionDto,
+  ) {
+    return await this.transactionService.removeTransactions(
+      loggedInUser,
+      removeTransactionDto,
     );
   }
 }

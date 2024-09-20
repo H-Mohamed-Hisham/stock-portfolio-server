@@ -7,9 +7,11 @@ import { PrismaModule } from '@app/prisma/prisma.module';
 import { AssetService } from './asset.service';
 import { AssetController } from './asset.controller';
 
+// Transaction
+import { TransactionService } from 'src/transaction/transaction.service';
 @Module({
   controllers: [AssetController],
-  providers: [AssetService],
+  providers: [AssetService, TransactionService],
   imports: [PrismaModule],
   exports: [AssetService],
 })

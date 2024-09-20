@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
@@ -16,10 +17,16 @@ import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { AssetEntity } from './entities/asset.entity';
 
+// Transaction
+import { TransactionService } from '@app/transaction/transaction.service';
+
 @Controller('asset')
 @ApiTags('asset')
 export class AssetController {
-  constructor(private readonly assetService: AssetService) {}
+  constructor(
+    private readonly assetService: AssetService,
+    private readonly transactionService: TransactionService,
+  ) {}
 
   @Post()
   @ApiCreatedResponse({ type: AssetEntity })
@@ -56,8 +63,17 @@ export class AssetController {
 
   @Delete(':id')
   @ApiOkResponse({ type: AssetEntity })
-  remove(@Param('id') id: string) {
-    const asset = this.assetService.findOne(id);
+  async remove(@Param('id') id: string) {
+    const findTransactionWithAssetID =
+      await this.transactionService.findTransactionWithAssetID(id);
+
+    if (findTransactionWithAssetID) {
+      throw new BadRequestException(
+        `Unable to delete : Asset is connected with transaction, Try removing transaction related to ${findTransactionWithAssetID.asset.name} first and remove this asset`,
+      );
+    }
+
+    const asset = await this.assetService.findOne(id);
     if (!asset) {
       throw new NotFoundException(`Asset with ${id} does not exist.`);
     }

@@ -353,4 +353,29 @@ export class TransactionService {
 
     return result;
   }
+
+  findTransactionWithAssetID(id: string) {
+    return this.prisma.transaction.findFirst({
+      where: { asset_id: id },
+      select: {
+        id: true,
+        user_id: true,
+        date: true,
+        asset_id: true,
+        transaction_type: true,
+        quantity: true,
+        price: true,
+        tax: true,
+        total: true,
+        asset: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+            type: true,
+          },
+        },
+      },
+    });
+  }
 }

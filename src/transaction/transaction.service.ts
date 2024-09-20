@@ -325,19 +325,25 @@ export class TransactionService {
 
     const invested = buy_transaction?._sum.total ?? 0;
     const returns = sell_transaction?._sum.total ?? 0;
+
     const quantity_bought = buy_transaction?._sum.quantity ?? 0;
     const quantity_sold = sell_transaction?._sum.quantity ?? 0;
     const quantity_holding = quantity_bought - quantity_sold;
+
     const profit_loss_amount =
-      returns > invested
-        ? Number(returns) - Number(invested)
-        : Number(invested) - Number(returns);
+      quantity_sold === 0
+        ? 0
+        : returns > invested
+          ? Number(returns) - Number(invested)
+          : Number(invested) - Number(returns);
     const profit_loss_status =
-      Number(invested) < Number(returns)
-        ? 'profit'
-        : Number(invested) > Number(returns)
-          ? 'loss'
-          : 'no profit no loss';
+      quantity_sold === 0
+        ? 'no profit no loss'
+        : Number(invested) < Number(returns)
+          ? 'profit'
+          : Number(invested) > Number(returns)
+            ? 'loss'
+            : 'no profit no loss';
 
     const result = {
       name: asset_type === 'stock' ? 'Stock' : 'Index',

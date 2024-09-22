@@ -8,8 +8,14 @@ import {
   Delete,
   NotFoundException,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 // Asset
 import { AssetService } from './asset.service';
@@ -20,6 +26,9 @@ import { AssetEntity } from './entities/asset.entity';
 // Transaction
 import { TransactionService } from '@app/transaction/transaction.service';
 
+// Auth
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+
 @Controller('asset')
 @ApiTags('asset')
 export class AssetController {
@@ -29,8 +38,9 @@ export class AssetController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiCreatedResponse({ type: AssetEntity })
-  @Post()
   create(@Body() createAssetDto: CreateAssetDto) {
     return this.assetService.create(createAssetDto);
   }
@@ -52,6 +62,8 @@ export class AssetController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: AssetEntity })
   update(@Param('id') id: string, @Body() updateAssetDto: UpdateAssetDto) {
     const asset = this.assetService.findOne(id);
@@ -62,6 +74,8 @@ export class AssetController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: AssetEntity })
   async remove(@Param('id') id: string) {
     const findTransactionWithAssetID =

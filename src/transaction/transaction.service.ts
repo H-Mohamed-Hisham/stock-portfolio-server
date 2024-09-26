@@ -58,13 +58,18 @@ export class TransactionService {
     transactionListDto: TransactionListDto,
   ) {
     const logged_in_user = loggedInUser;
-    const { transaction_type } = transactionListDto;
+    const { transaction_type, asset_type } = transactionListDto;
 
     return await this.prisma.transaction.findMany({
       where: {
         user_id: logged_in_user.id,
         ...(['buy', 'sell'].includes(transaction_type) && {
           transaction_type: transaction_type,
+        }),
+        ...(['stock', 'index'].includes(asset_type) && {
+          asset: {
+            type: asset_type,
+          },
         }),
       },
       select: {

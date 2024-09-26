@@ -6,6 +6,11 @@ export class TransactionListDto {
   @IsNotEmpty()
   @ApiProperty()
   transaction_type: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  asset_type: string;
 }
 
 export class AssetTransactionListDto {
